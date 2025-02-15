@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/enums/role.enum';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
 import { User } from 'src/graphql/models/User';
 import { UserSetting } from 'src/graphql/models/UserSettings';
 import { CreateUserDto } from 'src/graphql/utils/CreateUserDto';
 import { UpdateUserDto } from 'src/graphql/utils/UpdateUserDto';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -15,17 +16,9 @@ export class UserService {
     private userSettingsRepo: Repository<UserSetting>,
   ) {}
 
-  // Only an ADMIN is allowed to get all users
-  async getUsers(id: number) {
-    const user = await this.getUserById(id);
-    if (!user) throw new NotFoundException('User does not exist');
-
-    if (user.role !== Role.ADMIN) {
-      throw new Error('Unauthorized');
-    }
-
-    // todo: return users other than the current user
-    return this.userRepo.find({ relations: ['settings'] });
+  async getUsers() {
+    const users = await this.userRepo.find({ relations: ['settings'] });
+    return users;
   }
 
   async getUserById(id: number) {
@@ -39,11 +32,13 @@ export class UserService {
     return user;
   }
 
-  getUserByUsername(username: string) {
-    return this.userRepo.findOne({
+  async getUserByUsername(username: string) {
+    const user = await this.userRepo.findOne({
       where: { username },
       relations: ['settings'],
     });
+
+    return user || undefined;
   }
 
   async createUser(createUserDto: CreateUserDto) {
@@ -55,7 +50,11 @@ export class UserService {
       throw new Error('User already exists');
     }
 
-    const newUser = this.userRepo.create(createUserDto);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const newUser = this.userRepo.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
     newUser.role = Role.USER;
 
     const savedUser = await this.userRepo.save(newUser);
@@ -74,14 +73,28 @@ export class UserService {
 
   // update user displayName
   async updateUser(updateUserDto: UpdateUserDto) {
-    const { id, displayName } = updateUserDto;
+    const { id, displayName, password, role } = updateUserDto;
     const user = await this.userRepo.findOne({
       where: { id },
     });
+
     if (!user) {
       throw new NotFoundException('User does not exist');
     }
-    user.displayName = displayName;
+
+    if (password && password?.length > 0) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    if (displayName && displayName?.length > 0) {
+      user.displayName = displayName;
+    }
+
+    if (role) {
+      user.role = role;
+    }
+
     return this.userRepo.save(user);
   }
 

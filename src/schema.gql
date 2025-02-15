@@ -16,17 +16,23 @@ type User {
   settings: UserSetting
 }
 
+type AuthResponse {
+  access_token: String!
+}
+
 type Query {
   getUserById(id: Int!): User
-  getUsers(id: Float!): [User!]!
+  getUsers: [User!]!
+  getProfile: User!
 }
 
 type Mutation {
   createUser(body: CreateUserDto!): User!
-  updateUser(id: Int!, displayName: String!): User!
+  updateUser(body: UpdateUserDto!): User!
   deleteUser(id: Int!): User!
   createUserSettings(createUserSettingsDto: CreateUserSettingsDto!): UserSetting!
   updateUserSettings(updateUserSettingsDto: CreateUserSettingsDto!): UserSetting!
+  login(authInput: AuthInput!): AuthResponse!
 }
 
 input CreateUserDto {
@@ -35,8 +41,20 @@ input CreateUserDto {
   displayName: String
 }
 
+input UpdateUserDto {
+  id: Int!
+  displayName: String
+  password: String
+  role: String
+}
+
 input CreateUserSettingsDto {
   userId: Int!
   receiveEmails: Boolean = false
   receiveNotifications: Boolean = false
+}
+
+input AuthInput {
+  username: String!
+  password: String!
 }

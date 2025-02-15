@@ -1,5 +1,4 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { UserSetting } from './UserSettings';
 import {
   Column,
   Entity,
@@ -8,12 +7,13 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Role } from 'src/enums/role.enum';
+import { UserSetting } from './UserSettings';
 
 @Entity({ name: 'users' })
 @ObjectType()
 export class User {
   @PrimaryGeneratedColumn()
-  @Field((type) => Int)
+  @Field(() => Int)
   id: number;
 
   @Column({ unique: true })

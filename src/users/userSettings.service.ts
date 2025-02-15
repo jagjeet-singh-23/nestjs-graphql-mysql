@@ -1,8 +1,8 @@
-import { CreateUserSettingsDto } from './../graphql/utils/CreateUserSettingsDto';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/graphql/models/User';
 import { UserSetting } from 'src/graphql/models/UserSettings';
+import { CreateUserSettingsDto } from 'src/graphql/utils/CreateUserSettingsDto';
 import { Repository } from 'typeorm';
 
 @Injectable()

@@ -3,10 +3,10 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './graphql/models/User';
 import { UserSetting } from './graphql/models/UserSettings';
+import { AuthModule } from './auth/auth.module';
+import { User } from './graphql/models/User';
 import { UserModule } from './users/user.module';
-import { RolesGuard } from './guard/roles.gurad';
 
 @Module({
   imports: [
@@ -25,16 +25,11 @@ import { RolesGuard } from './guard/roles.gurad';
       database: process.env.MYSQL_DB_NAME,
       entities: [User, UserSetting],
       synchronize: true,
-      logging: true,
     }),
     UserModule,
+    AuthModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: 'APP_GUARD',
-      useClass: RolesGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}
