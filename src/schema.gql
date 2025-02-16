@@ -22,12 +22,13 @@ type AuthResponse {
 
 type Query {
   getUserById(id: Int!): User
-  getUsers: [User!]!
+  getUsers(id: Int!): [User!]!
   getProfile: User!
 }
 
 type Mutation {
   createUser(body: CreateUserDto!): User!
+  updatePassword(body: UpdateUserDto!): User!
   updateUser(body: UpdateUserDto!): User!
   deleteUser(id: Int!): User!
   createUserSettings(createUserSettingsDto: CreateUserSettingsDto!): UserSetting!

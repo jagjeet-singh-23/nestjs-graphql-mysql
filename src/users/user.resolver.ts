@@ -31,8 +31,8 @@ export class UserResolver {
 
   // @UseGuards(GqlAuthGuard)
   @Query(() => [User])
-  async getUsers() {
-    const users = await this.userService.getUsers();
+  async getUsers(@Args('id', { type: () => Int }) id: number) {
+    const users = await this.userService.getUsers(id);
     return users;
   }
 
@@ -47,6 +47,16 @@ export class UserResolver {
   async createUser(@Args('body') createUserInput: CreateUserDto) {
     try {
       return this.userService.createUser(createUserInput);
+    } catch (error: any) {
+      console.error(error);
+    }
+  }
+
+  // @UseGuards(GqlAuthGuard)
+  @Mutation(() => User)
+  async updatePassword(@Args('body') updatePassword: UpdateUserDto) {
+    try {
+      return await this.userService.updatePassword(updatePassword);
     } catch (error: any) {
       console.error(error);
     }

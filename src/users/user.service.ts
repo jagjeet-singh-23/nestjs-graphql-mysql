@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from 'src/enums/role.enum';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from 'src/graphql/models/User';
 import { UserSetting } from 'src/graphql/models/UserSettings';
@@ -16,8 +20,19 @@ export class UserService {
     private userSettingsRepo: Repository<UserSetting>,
   ) {}
 
-  async getUsers() {
-    const users = await this.userRepo.find({ relations: ['settings'] });
+  // Fetch all users other than the current user,
+  // iff the current user is an admin
+  async getUsers(id: number) {
+    const user = await this.getUserById(id);
+
+    if (!user || user.role !== Role.ADMIN) {
+      throw new ForbiddenException('Unauthorized');
+    }
+
+    const users = await this.userRepo.find({
+      where: { id: Not(id) }, // exclude the user with the provided id
+      relations: ['settings'],
+    });
     return users;
   }
 
@@ -71,9 +86,8 @@ export class UserService {
     return { ...savedUser, settings: savedUserSettings };
   }
 
-  // update user displayName
-  async updateUser(updateUserDto: UpdateUserDto) {
-    const { id, displayName, password, role } = updateUserDto;
+  async updatePassword(updateUserDto: UpdateUserDto) {
+    const { id, password } = updateUserDto;
     const user = await this.userRepo.findOne({
       where: { id },
     });
@@ -82,9 +96,21 @@ export class UserService {
       throw new NotFoundException('User does not exist');
     }
 
-    if (password && password?.length > 0) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+
+    return this.userRepo.save(user);
+  }
+
+  // update user displayName
+  async updateUser(updateUserDto: UpdateUserDto) {
+    const { id, displayName, role } = updateUserDto;
+    const user = await this.userRepo.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User does not exist');
     }
 
     if (displayName && displayName?.length > 0) {
