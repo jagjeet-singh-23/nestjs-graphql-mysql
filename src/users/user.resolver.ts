@@ -1,5 +1,5 @@
+// import { JwtAuthGuard } from 'src/auth/gql-auth.guard';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-// import { GqlAuthGuard } from 'src/guard/gql-auth.guard';
 import { ForbiddenException } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { User } from 'src/graphql/models/User';
@@ -15,8 +15,8 @@ export class UserResolver {
     private readonly userSettingService: UserSettingsService,
   ) {}
 
-  // @UseGuards(GqlAuthGuard)
   @Query(() => User, { nullable: true })
+  // @UseGuards(JwtAuthGuard)
   async getUserById(@Args('id', { type: () => Int }) id: number) {
     try {
       const user = await this.userService.getUserById(id);
@@ -29,8 +29,8 @@ export class UserResolver {
     }
   }
 
-  // @UseGuards(GqlAuthGuard)
   @Query(() => [User])
+  // @UseGuards(JwtAuthGuard)
   async getUsers(@Args('id', { type: () => Int }) id: number) {
     const users = await this.userService.getUsers(id);
     return users;
@@ -52,8 +52,8 @@ export class UserResolver {
     }
   }
 
-  // @UseGuards(GqlAuthGuard)
   @Mutation(() => User)
+  // @UseGuards(JwtAuthGuard)
   async updatePassword(@Args('body') updatePassword: UpdateUserDto) {
     try {
       return await this.userService.updatePassword(updatePassword);
@@ -62,8 +62,8 @@ export class UserResolver {
     }
   }
 
-  // @UseGuards(GqlAuthGuard)
   @Mutation(() => User)
+  // @UseGuards(JwtAuthGuard)
   async updateUser(@Args('body') updateUserDto: UpdateUserDto) {
     try {
       return this.userService.updateUser(updateUserDto);
@@ -72,8 +72,8 @@ export class UserResolver {
     }
   }
 
-  // @UseGuards(GqlAuthGuard)
   @Mutation(() => User)
+  // @UseGuards(JwtAuthGuard)
   async deleteUser(@Args('id', { type: () => Int }) id: number) {
     try {
       return this.userService.deleteUser(id);

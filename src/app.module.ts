@@ -15,6 +15,7 @@ import { UserModule } from './users/user.module';
       driver: ApolloDriver,
       autoSchemaFile: 'src/schema.gql',
       playground: true,
+      context: ({ req, res }) => ({ req, res }),
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',

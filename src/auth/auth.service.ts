@@ -10,6 +10,10 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  async validateToken(token: string) {
+    return await this.jwtService.verifyAsync(token);
+  }
+
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService.getUserByUsername(username);
     if (!user) return null;
