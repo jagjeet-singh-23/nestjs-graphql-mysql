@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Response } from 'express';
 import { UserService } from 'src/users/user.service';
+import { AuthResponse } from './dto/auth.response';
 
 @Injectable()
 export class AuthService {
@@ -28,10 +30,27 @@ export class AuthService {
     return result;
   }
 
-  login(user: any) {
+  async login(user: any, res: Response): Promise<AuthResponse> {
     const payload = { username: user.username, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+    const access_token = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '600s',
+    });
+
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    return { access_token }; // return an AuthResponse instead of calling res.send()
+  }
+
+  logout(res: Response): boolean {
+    res.cookie('access_token', null, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      expires: new Date(Date.now() + 1000),
+    });
+    return true;
   }
 }

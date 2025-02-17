@@ -1,3 +1,4 @@
+import { UpdatePasswordDto } from './../graphql/utils/UpdatePasswordDto';
 import {
   ForbiddenException,
   Injectable,
@@ -86,10 +87,11 @@ export class UserService {
     return { ...savedUser, settings: savedUserSettings };
   }
 
-  async updatePassword(updateUserDto: UpdateUserDto) {
-    const { id, password } = updateUserDto;
+  async updatePassword(updatePasswordDto: UpdatePasswordDto) {
+    const { username, password } = updatePasswordDto;
+
     const user = await this.userRepo.findOne({
-      where: { id },
+      where: { username },
     });
 
     if (!user) {

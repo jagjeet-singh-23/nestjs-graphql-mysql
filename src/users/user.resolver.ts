@@ -1,12 +1,14 @@
+import { UpdatePasswordDto } from './../graphql/utils/UpdatePasswordDto';
 // import { JwtAuthGuard } from 'src/auth/gql-auth.guard';
 import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, UseGuards } from '@nestjs/common';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { User } from 'src/graphql/models/User';
 import { UserService } from './user.service';
 import { UserSettingsService } from './userSettings.service';
 import { CreateUserDto } from 'src/graphql/utils/CreateUserDto';
 import { UpdateUserDto } from 'src/graphql/utils/UpdateUserDto';
+import { JwtAuthGuard } from 'src/auth/gql-auth.guard';
 
 @Resolver(() => User)
 export class UserResolver {
@@ -15,7 +17,7 @@ export class UserResolver {
     private readonly userSettingService: UserSettingsService,
   ) {}
 
-  @Query(() => User, { nullable: true })
+  @Query(() => User)
   // @UseGuards(JwtAuthGuard)
   async getUserById(@Args('id', { type: () => Int }) id: number) {
     try {
@@ -30,7 +32,7 @@ export class UserResolver {
   }
 
   @Query(() => [User])
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async getUsers(@Args('id', { type: () => Int }) id: number) {
     const users = await this.userService.getUsers(id);
     return users;
@@ -53,8 +55,8 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  // @UseGuards(JwtAuthGuard)
-  async updatePassword(@Args('body') updatePassword: UpdateUserDto) {
+  @UseGuards(JwtAuthGuard)
+  async updatePassword(@Args('body') updatePassword: UpdatePasswordDto) {
     try {
       return await this.userService.updatePassword(updatePassword);
     } catch (error: any) {
@@ -63,7 +65,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async updateUser(@Args('body') updateUserDto: UpdateUserDto) {
     try {
       return this.userService.updateUser(updateUserDto);
@@ -73,7 +75,7 @@ export class UserResolver {
   }
 
   @Mutation(() => User)
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   async deleteUser(@Args('id', { type: () => Int }) id: number) {
     try {
       return this.userService.deleteUser(id);

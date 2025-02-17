@@ -8,7 +8,5 @@ export class UpdateUserDto {
   @Field({ nullable: true })
   displayName?: string;
   @Field({ nullable: true })
-  password?: string;
-  @Field({ nullable: true })
   role?: Role;
 }
